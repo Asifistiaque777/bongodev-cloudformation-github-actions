@@ -18,7 +18,7 @@ permissions:
 
 # Avoid two stack operations racing against each other.
 concurrency:
-  group: bongodev-cloudformation-dev
+  group: bongodev-cloudformation-dev-v2
   cancel-in-progress: false
 
 jobs:
