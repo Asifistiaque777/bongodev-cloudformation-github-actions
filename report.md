@@ -46,7 +46,7 @@ When I push to `main`, GitHub starts a workflow. The workflow does not have any 
 
 First I told AWS to trust GitHub. I added an identity provider in IAM for `token.actions.githubusercontent.com`, with the audience `sts.amazonaws.com`.
 
-![Figure 1: The OIDC provider in IAM](report-screenshots/01-iam-oidc-provider.png)
+![Figure 1: The OIDC provider in IAM](screenshots/01_provider_added.png)
 
 *Figure 1: AWS now knows GitHub as a trusted identity provider.*
 
@@ -54,7 +54,7 @@ First I told AWS to trust GitHub. I added an identity provider in IAM for `token
 
 Next I made a policy with only the permissions this lab needs: work with CloudFormation, create the EC2 and network parts, and read the Ubuntu image name from Systems Manager. I did not give it full admin power.
 
-![Figure 2: The IAM policy](report-screenshots/02-iam-policy-created.png)
+![Figure 2: The IAM policy](screenshots/02_policy_created.png)
 
 *Figure 2: The policy `bongodev-github-iac-lab-policy`.*
 
@@ -62,7 +62,7 @@ Next I made a policy with only the permissions this lab needs: work with CloudFo
 
 Then I made the role that GitHub Actions uses. The important part is the trust policy. It says that only my repository, and only the `main` branch, can use this role. So another repository cannot use it, even if someone knows its name.
 
-![Figure 3: The role with its permission and trust policy](report-screenshots/03-iam-role-permissions.png)
+![Figure 3: The role with its permission and trust policy](screenshots/03_trust_policy_attached.png)
 
 *Figure 3: The role has my policy attached, and the trust policy is updated.*
 
@@ -72,13 +72,13 @@ Then I made the role that GitHub Actions uses. The important part is the trust p
 
 In the repository settings I added two variables: the role address (`AWS_ROLE_ARN`) and the region (`AWS_REGION`). They are not passwords, so a variable is fine. I covered the role address in the screenshot because the repository is public.
 
-![Figure 4: GitHub variables](report-screenshots/04-github-variables.png)
+![Figure 4: GitHub variables](screenshots/04_variable_created.png)
 
 *Figure 4: The two repository variables.*
 
 The repository has the CloudFormation file, the workflow file, the IAM policy files and this report.
 
-![Figure 5: Files in the repository](report-screenshots/05-github-repo-files.png)
+![Figure 5: Files in the repository](screenshots/05_successfully_pushed.png)
 
 *Figure 5: The files in my GitHub repository.*
 
@@ -88,31 +88,31 @@ The repository has the CloudFormation file, the workflow file, the IAM policy fi
 
 After my first push, the workflow ran. Every step is green and the whole run took 1 minute 16 seconds.
 
-![Figure 6: The first run, all steps green](report-screenshots/06-actions-run1-steps-green.png)
+![Figure 6: The first run, all steps green](screenshots/06_action_successfull.png)
 
 *Figure 6: Run #1 passed.*
 
 At the end, the workflow prints the outputs of the stack: the instance ID, the VPC ID and the public IP.
 
-![Figure 7: Outputs of the first run](report-screenshots/07-actions-run1-outputs.png)
+![Figure 7: Outputs of the first run](screenshots/07_action_success_2.png)
 
 *Figure 7: The instance ID is `i-0f9b03460f4eada58` and the public IP is 184.34.218.237.*
 
 In the AWS console the stack shows `CREATE_COMPLETE`.
 
-![Figure 8: The stack was created](report-screenshots/08-stack-create-complete.png)
+![Figure 8: The stack was created](screenshots/08_stack_create_complete.png)
 
 *Figure 8: `CREATE_COMPLETE` for `bongodev-github-iac-dev`.*
 
 The stack made 9 resources, and all of them are `CREATE_COMPLETE`.
 
-![Figure 9: The 9 resources](report-screenshots/09-stack-resources-created.png)
+![Figure 9: The 9 resources](screenshots/09_resource_tab.png)
 
 *Figure 9: VPC, subnet, internet gateway, route table, security group and the EC2 instance are all there.*
 
 Finally I opened the public IP in my browser. Nginx answers with my page.
 
-![Figure 10: The live website](report-screenshots/10-website-live.png)
+![Figure 10: The live website](screenshots/10_website.png)
 
 *Figure 10: "Hello from bongoDev!" with Environment: dev.*
 
@@ -124,7 +124,7 @@ For the second change I did not touch the web page. I only changed one tag on th
 
 I will explain below why I changed a tag and not the HTML.
 
-![Figure 11: The commits on main](report-screenshots/11-commits-page.png)
+![Figure 11: The commits on main](screenshots/11_second_commit_success.png)
 
 *Figure 11: Three commits. `81f16dc` is the first deployment, `9072ad4` is the tag change and `a8ed5d3` is the fix I explain next.*
 
@@ -132,17 +132,17 @@ I will explain below why I changed a tag and not the HTML.
 
 After the push, the new run (Run #2) stayed in the `Queued` state and never started. I waited a long time, then I tried to cancel it, but the cancel did not work.
 
-![Figure 12: Run #2 stuck in the queue](report-screenshots/12-actions-run2-queued.png)
+![Figure 12: Run #2 stuck in the queue](screenshots/extra_run2_queued.png)
 
 *Figure 12: Run #2 was queued for many minutes, while Run #1 was already a success.*
 
-![Figure 13: Cancel failed](report-screenshots/13-actions-run2-cancel-failed.png)
+![Figure 13: Cancel failed](screenshots/extra_run2_cancel_failed.png)
 
 *Figure 13: GitHub said "Failed to cancel workflow".*
 
 Then I looked at the GitHub status page. It was not my mistake. GitHub Actions had an incident with degraded availability that day.
 
-![Figure 14: GitHub status page](report-screenshots/14-github-status-incident.png)
+![Figure 14: GitHub status page](screenshots/extra_github_status_incident.png)
 
 *Figure 14: The GitHub incident page.*
 
@@ -154,7 +154,7 @@ My workflow has a `concurrency` group, which makes sure only one deployment runs
 
 I want to be honest here: the tag change itself is from commit `9072ad4`. Run #3 deployed it, because it used the latest code on `main`.
 
-![Figure 15: Run #3 outputs](report-screenshots/15-actions-run3-outputs.png)
+![Figure 15: Run #3 outputs](screenshots/12_second_action_complete.png)
 
 *Figure 15: Run #3 passed and printed the same instance ID `i-0f9b03460f4eada58`.*
 
@@ -162,13 +162,13 @@ I want to be honest here: the tag change itself is from commit `9072ad4`. Run #3
 
 The stack now shows `UPDATE_COMPLETE`. Only the EC2 instance has an update. The network parts were not touched.
 
-![Figure 16: The stack was updated](report-screenshots/16-stack-update-complete.png)
+![Figure 16: The stack was updated](screenshots/13_stack_update_complete.png)
 
 *Figure 16: `UPDATE_COMPLETE`. It is the same stack and not a new one.*
 
 On the EC2 page the new tag is there, and the instance ID is still the same. So AWS changed the tag on the same machine. It did not make a new server. The instance is Running with 3/3 checks passed.
 
-![Figure 17: The new tag on the same instance](report-screenshots/17-ec2-tag-v2.png)
+![Figure 17: The new tag on the same instance](screenshots/14_ec2_tag_v2.png)
 
 *Figure 17: `Course = bongoDev-DevOps-Homework-V2` on `i-0f9b03460f4eada58`.*
 
@@ -180,21 +180,27 @@ I did not want to leave anything running, so I deleted the lab at the end.
 
 First I deleted the stack. CloudFormation removes all 9 resources by itself. The stack list is now empty.
 
-![Figure 18: No stacks left](report-screenshots/18-stacks-empty.png)
+![Figure 18: No stacks left](screenshots/16_stack_deleted.png)
 
 *Figure 18: Stacks (0).*
 
 The EC2 instance is terminated.
 
-![Figure 19: The instance is terminated](report-screenshots/19-ec2-terminated.png)
+![Figure 19: The instance is terminated](screenshots/17_ec2_terminated.png)
 
 *Figure 19: The instance state is Terminated. The old tags are still shown for a short time.*
 
 Then I deleted the IAM role. Without this role, no workflow, old or stuck, can create the stack again.
 
-![Figure 20: The role is deleted](report-screenshots/20-iam-role-deleted.png)
+![Figure 20: The role is deleted](screenshots/18_iam_cleaned.png)
 
 *Figure 20: AWS shows "Role deleted".*
+
+Last, I deleted the OIDC provider, because nothing needs it any more.
+
+![Figure 21: The OIDC provider is deleted](screenshots/19_identity_provider_deleted.png)
+
+*Figure 21: The identity provider list is empty.*
 
 ---
 
@@ -240,7 +246,7 @@ The UserData script runs only the first time the server boots. If I only change 
 
 ### 7. What should happen to the resources at the end?
 
-They should be deleted, so there are no extra costs. I deleted the stack, which removes the VPC, the EC2 and the other resources, and then I deleted the role. The IAM policy and the GitHub workflow are the last things to clean up. The policy can be deleted in IAM, and the workflow can be disabled in the Actions tab. I did not take screenshots of those two steps.
+They should be deleted, so there are no extra costs. I deleted the stack, which removes the VPC, the EC2 and the other resources. Then I deleted the role and the OIDC provider. The IAM policy can also be deleted in IAM, and the workflow can be disabled in the Actions tab, so nothing can run by mistake.
 
 ---
 
